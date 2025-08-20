@@ -89,6 +89,33 @@ def interface_diag_test(client: httpx.Client, interface: str, test: str) -> http
 interface_diag_test(client, test_interface, "cable_diagnostic").json()
 
 # %% [markdown]
+# ### Result
+# 
+# 10/100mbit:
+# ```json
+# {
+#     "cable_diagnostic_result": {
+#         "1-2": { "status": "good" },
+#         "3-6": { "status": "good" },
+#         "4-5": { "status": "good" },
+#         "7-8": { "status": "good" }
+#     }
+# }
+# ```
+# 
+# 1gbit:
+# ````json
+# {
+#     "cable_diagnostic_result": {
+#         "1-2": { "status": "good" },
+#         "3-6": { "status": "good" },
+#         "4-5": { "status": "open" },
+#         "7-8": { "status": "open" }
+#     }
+# }
+# ```
+
+# %% [markdown]
 # ## Set interface speed
 
 # %%
