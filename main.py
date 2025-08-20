@@ -27,11 +27,12 @@ from typing import Optional
 
 # %%
 base_url = "https://192.168.0.78"
+version = "v10.15"
 
 
 client = httpx.Client(verify=False)
 
-login_result = client.post(f"{base_url}/rest/v10.15/login", params={
+login_result = client.post(f"{base_url}/rest/{version}/login", params={
     "username": "admin",
     "password": ""
 })
@@ -43,7 +44,7 @@ login_result.text
 
 # %%
 def cli(client: httpx.Client, cmd: str) -> str:
-    result = client.post(f"{base_url}/rest/v10.15/cli",
+    result = client.post(f"{base_url}/rest/{version}/cli",
                          json={"cmd": cmd})
     return result.text
 
@@ -59,9 +60,12 @@ cli(client=client, cmd="show uptime")
 # 3. Delete request (to allow retest, we could also check beforehand)
 
 # %%
+test_interface = "1/1/1"
+
+# %%
 def interface_diag_test(client: httpx.Client, interface: str, test: str) -> httpx.Response:
-    result = client.post(f"{base_url}/rest/v10.15/system/interfaces/{quote_plus(interface)}/interface_diag_tests", json={
-        "interface": f"/rest/v10.15/system/interfaces/{quote_plus(interface)}",
+    result = client.post(f"{base_url}/rest/{version}/system/interfaces/{quote_plus(interface)}/interface_diag_tests", json={
+        "interface": f"/rest/{version}/system/interfaces/{quote_plus(interface)}",
         "test": test
     })
 
@@ -70,7 +74,7 @@ def interface_diag_test(client: httpx.Client, interface: str, test: str) -> http
     time.sleep(7)
     while True:
         result = client.get(
-            f"{base_url}/rest/v10.15/system/interfaces/{quote_plus(interface)}/interface_diag_tests/{test}")
+            f"{base_url}/rest/{version}/system/interfaces/{quote_plus(interface)}/interface_diag_tests/{test}")
         print(result.status_code, result.text)
         if (result.json()["state"] != "complete"):
             time.sleep(1)
@@ -78,39 +82,39 @@ def interface_diag_test(client: httpx.Client, interface: str, test: str) -> http
             break
 
     client.delete(
-        f"{base_url}/rest/v10.15/system/interfaces/{quote_plus(interface)}/interface_diag_tests/{test}")
+        f"{base_url}/rest/{version}/system/interfaces/{quote_plus(interface)}/interface_diag_tests/{test}")
     return result
 
 
-interface_diag_test(client, "1/1/1", "cable_diagnostic").json()
+interface_diag_test(client, test_interface, "cable_diagnostic").json()
 
 # %% [markdown]
 # ## Set interface speed
 
 # %%
 def set_speed(client: httpx.Client, interface: str, speeds: str) -> httpx.Response:
-    result = client.patch(f"{base_url}/rest/v10.15/system/interfaces/{quote_plus(interface)}", json={
+    result = client.patch(f"{base_url}/rest/{version}/system/interfaces/{quote_plus(interface)}", json={
         "user_config": {
             "speeds": speeds
         }
     })
     return result
 
-set_speed(client, "1/1/1", "10-full 10-half 100-half 100-full")
+set_speed(client, test_interface, "10-full 10-half 100-half 100-full")
 
 # %% [markdown]
 # ## Remove interface speed
 
 # %%
 def remove_speed(client: httpx.Client, interface: str) -> httpx.Response:
-    result = client.patch(f"{base_url}/rest/v10.15/system/interfaces/{quote_plus(interface)}", json={
+    result = client.patch(f"{base_url}/rest/{version}/system/interfaces/{quote_plus(interface)}", json={
         "user_config": {
             "speeds": ""
         }
     })
     return result
 
-remove_speed(client, "1/1/1")
+remove_speed(client, test_interface)
 
 # %% [markdown]
 # ## Logout of switch
@@ -118,7 +122,7 @@ remove_speed(client, "1/1/1")
 # Sessions are limited to 6 per Switch
 
 # %%
-logout_result = client.post(f"{base_url}/rest/v10.15/logout")
+logout_result = client.post(f"{base_url}/rest/{version}/logout")
 
 logout_result
 
